@@ -1,58 +1,70 @@
-
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import ChatWidget from './components/ChatWidget';
 import Admin from './components/Admin';
+import gelaLogo from './assets/gela-clean-final.png';
 
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-[#0f172a] text-slate-200 font-sans selection:bg-rose-500/30 overflow-x-hidden">
+      <div className="h-screen bg-[#0f172a] text-slate-200 font-sans selection:bg-rose-500/30 overflow-hidden relative flex flex-col">
 
-        {/* ფონის დეკორაციები (რომელიც არ უშლის ხელს კლიკებს) */}
-        <div className="fixed inset-0 pointer-events-none">
+        {/* ფონის დეკორაციები */}
+        <div className="fixed inset-0 pointer-events-none z-0">
           <div className="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] rounded-full bg-rose-900/10 blur-[120px]"></div>
           <div className="absolute bottom-[0%] -right-[10%] w-[40%] h-[40%] rounded-full bg-blue-900/10 blur-[120px]"></div>
         </div>
 
         <Routes>
-          {/* მთავარი გვერდი */}
           <Route path="/" element={
-            <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-6 text-center">
+            <div className="relative z-10 flex flex-col items-center justify-center h-full p-4 text-center">
 
-              <header className="animate-in fade-in zoom-in duration-1000">
-                {/* სისტემის სახელი - დიდი ასოებით და გამოკვეთილად */}
-                <div className="inline-block px-6 py-2 mb-8 text-sm font-black tracking-[0.3em] uppercase border-2 rounded-full border-rose-500 text-rose-500 bg-rose-500/5 shadow-[0_0_20px_rgba(244,63,94,0.2)]">
-                  სისტემა გელა • 2026
+              <header className="animate-in fade-in zoom-in duration-1000 flex flex-col items-center pt-2">
+
+                {/* გელას მასკოტი - უფრო კომპაქტური */}
+                <div className="relative flex flex-col items-center mb-2">
+                  <img
+                    src={gelaLogo}
+                    alt="Gela Mascot"
+                    className="w-32 md:w-48 h-auto animate-float drop-shadow-[0_10px_30px_rgba(255,255,255,0.05)]"
+                  />
+
+                  <div className="mt-[-10px] flex flex-col items-center">
+                    <h2 className="text-2xl md:text-3xl font-black tracking-[0.2em] text-white uppercase">
+                      SYSTEM GELA
+                    </h2>
+                    <p className="text-[8px] md:text-[10px] font-bold tracking-[0.4em] text-slate-400 uppercase mt-1">
+                      შენი პირადი სომელიე
+                    </p>
+                  </div>
                 </div>
 
-                <h1 className="text-6xl md:text-8xl font-black text-white mb-8 tracking-tighter">
-                  GEL<span className="text-rose-600">MRIELI</span>
+                {/* მთავარი სახელი: GE-MRIELI */}
+                <h1 className="text-5xl md:text-7xl font-black text-white mt-4 mb-4 tracking-tighter uppercase">
+                  GE-<span className="text-rose-600">MRIELI</span>
                 </h1>
 
-                <p className="max-w-2xl mx-auto text-xl text-slate-400 font-light leading-relaxed mb-12">
+                <p className="max-w-xl mx-auto text-lg md:text-xl text-slate-400 font-light leading-relaxed mb-6">
                   პერსონალური AI ასისტენტი თქვენი რესტორნისთვის. <br />
-                  <span className="text-slate-500">დასვით კითხვა ნებისმიერ ენაზე და მიიღეთ მყისიერი პასუხი.</span>
+                  <span className="text-slate-500 font-normal">დასვით კითხვა და მიიღეთ მყისიერი პასუხი.</span>
                 </p>
 
-                {/* აქ დავამატე ერთი ლამაზი ღილაკი, რომ საიტი ცარიელი არ ჩანდეს */}
                 <button
                   onClick={() => window.location.href = '/admin'}
-                  className="px-8 py-4 bg-white text-slate-900 rounded-full font-bold hover:scale-105 transition-transform shadow-xl"
+                  className="px-8 py-4 bg-white text-slate-900 rounded-full font-black hover:scale-105 active:scale-95 transition-all shadow-xl cursor-pointer uppercase tracking-widest"
                 >
                   ადმინ პანელში შესვლა
                 </button>
               </header>
 
-              {/* აი აქ არის ჩვენი ჩატი! ისევ თავის "ღილაკიან" ფორმაში */}
               <ChatWidget />
 
-              <footer className="fixed bottom-8 text-slate-600 text-xs tracking-widest uppercase">
+              {/* ფუტერი - მინიმალური დაშორებით */}
+              <footer className="mt-auto pb-4 text-slate-600 text-[9px] tracking-[0.3em] uppercase pointer-events-none opacity-40">
                 &copy; 2026 Advanced AI Hospitality Solutions
               </footer>
             </div>
           } />
 
-          {/* ადმინ პანელი */}
           <Route path="/admin" element={<Admin />} />
         </Routes>
       </div>
