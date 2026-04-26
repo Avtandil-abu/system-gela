@@ -108,7 +108,8 @@ export default function Admin() {
 
     // --- 2. მართვის პანელი (ავტორიზებული) ---
     return (
-        <div className="min-h-screen bg-[#0f172a] text-slate-300 p-6 md:p-12">
+        // დავამატეთ overflow-y-auto და ბოლოში დიდი პედინგი pb-32, რომ "ზოგადი ინფო" გამოჩნდეს
+        <div className="h-screen overflow-y-auto bg-[#0f172a] text-slate-300 p-6 md:p-12 pb-32 custom-scroll">
             <div className="max-w-3xl mx-auto">
                 <header className="flex justify-between items-center mb-12">
                     <div className="flex items-center gap-4">

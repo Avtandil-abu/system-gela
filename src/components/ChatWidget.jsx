@@ -1,14 +1,28 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
-import { askAI } from '../services/aiService';
 import { motion, AnimatePresence } from 'framer-motion';
-import GelaWindow from './GelaWindow'; // ახალ ფაილს ეხლავე შევქმნით
+import GelaWindow from './GelaWindow';
+import { askFakeAI } from '../services/fakeAiService';
 
-export default function ChatWidget() {
+export default function ChatWidget({ forceOpen, setForceOpen }) {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([]);
     const [menuData, setMenuData] = useState('');
     const [showHint, setShowHint] = useState(false);
+
+    // 🧠 აქ ვინახავთ კონტექსტს, თუ რომელი განყოფილებიდან შემოვიდა კლიენტი
+    const [activeCategory, setActiveCategory] = useState(null);
+
+    // 🎯 მენიუს ღილაკიდან გამოძახების ლოგიკა
+    useEffect(() => {
+        if (forceOpen) {
+            setIsOpen(true);
+            setShowHint(false);
+            // ვინახავთ კატეგორიას (მაგ: "ღვინო"), რომ გელამ იცოდეს რაზე ვსაუბრობთ
+            setActiveCategory(forceOpen);
+            if (setForceOpen) setForceOpen(false);
+        }
+    }, [forceOpen, setForceOpen]);
 
     // 1. მენიუს წამოღება ბაზიდან
     useEffect(() => {
@@ -19,16 +33,15 @@ export default function ChatWidget() {
         fetchMenu();
     }, []);
 
-    // 2. პატარა მინიშნების გამოჩენა 5 წამის შემდეგ
+    // 2. პატარა მინიშნების გამოჩენა (შენი ტაიმერები)
     useEffect(() => {
         const timer = setTimeout(() => {
             if (!isOpen) setShowHint(true);
-        }, 5000); // 5 წამში ამოხტება "კითხე გელას"
+        }, 5000);
 
-        // თუ ჩატი გაიხსნა, მინიშნება ვეღარ გამოჩნდება
         const hideTimer = setTimeout(() => {
             setShowHint(false);
-        }, 12000); // 12 წამში გაქრება თავისით
+        }, 12000);
 
         return () => {
             clearTimeout(timer);
@@ -36,13 +49,14 @@ export default function ChatWidget() {
         };
     }, [isOpen]);
 
-    // 3. მესიჯის გაგზავნა
+    // 3. მესიჯის გაგზავნა (გელას ვაწვდით კონტექსტს)
     const sendMessage = async (question) => {
         const userMessage = { id: Date.now(), text: question, role: 'user' };
         setMessages(prev => [...prev, userMessage]);
 
         try {
-            const aiResponse = await askAI(question, menuData, messages);
+            // 🍷 აი აქ გადაეცემა activeCategory, რომ გელა აღარ დაიბნეს
+            const aiResponse = await askFakeAI(question, menuData, activeCategory);
             const botMessage = { id: Date.now() + 1, text: aiResponse, role: 'bot' };
             setMessages(prev => [...prev, botMessage]);
         } catch (error) {
@@ -54,10 +68,9 @@ export default function ChatWidget() {
 
     return (
         <>
-            {/* 🍷 CHAT BUTTON (THE FLOATING WINE GLASS) */}
+            {/* 🍷 CHAT BUTTON (ყველა შენი სპეციფიკური კლასით) */}
             <div className="fixed bottom-6 right-6 z-50 flex items-center gap-4">
 
-                {/* ანიმირებული მინიშნება (Tooltip) */}
                 <AnimatePresence>
                     {showHint && !isOpen && (
                         <motion.div
@@ -71,11 +84,12 @@ export default function ChatWidget() {
                     )}
                 </AnimatePresence>
 
-                {/* ანიმირებული ღილაკი (ჭიქა) */}
                 <motion.button
                     onClick={() => {
                         setIsOpen(!isOpen);
                         setShowHint(false);
+                        // თუ ხელით ვაღებთ ჩატს, კონტექსტს ვასუფთავებთ
+                        if (!isOpen) setActiveCategory(null);
                     }}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -88,17 +102,14 @@ export default function ChatWidget() {
                         ease: "easeInOut",
                         times: [0, 0.5, 1]
                     }}
-                    // დააკვირდი ამ ახალ კლასებს: will-change-transform და isolate
                     className={`relative w-16 h-16 rounded-full shadow-2xl transition-colors duration-500 will-change-transform isolate ${isOpen ? 'bg-slate-800' : 'bg-rose-600'
                         }`}
                     style={{ transformOrigin: 'center center', backfaceVisibility: 'hidden' }}
                 >
-                    {/* ✕ და 🍷 - ორივე აბსოლუტურად ცენტრშია, რომ ადგილიდან არ დაიძრან */}
                     <span className="absolute inset-0 flex items-center justify-center select-none pointer-events-none">
                         {isOpen ? (
                             <span className="text-white text-2xl font-light">✕</span>
                         ) : (
-                            // 🍷 აქ ზის როგორც ჩვეულებრივი სიმბოლო, ყოველგვარი motion-ის გარეშე
                             <span className="text-3xl leading-none" style={{ transform: 'translateZ(0)' }}>
                                 🍷
                             </span>
@@ -107,7 +118,6 @@ export default function ChatWidget() {
                 </motion.button>
             </div>
 
-            {/* 🖥️ CHAT WINDOW (GELA WINDOW) - დაცული ანიმაციით */}
             <AnimatePresence>
                 {isOpen && (
                     <GelaWindow
